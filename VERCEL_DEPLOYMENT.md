@@ -34,7 +34,7 @@ After your Vercel app is deployed, you'll get a URL like `https://your-app-name.
 In your Render dashboard, add/update the following environment variable:
 
 ```
-FRONTEND_URL=https://your-actual-vercel-app-url.vercel.app
+FRONTEND_URL=https://invoice-generator-inc.vercel.app
 ```
 
 Replace `your-actual-vercel-app-url` with your actual Vercel deployment URL.
