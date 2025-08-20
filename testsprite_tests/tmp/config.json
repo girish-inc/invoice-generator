@@ -1,7 +1,18 @@
 {
-  "status": "init",
-  "scope": "codebase",
+  "status": "commited",
   "type": "frontend",
+  "scope": "codebase",
   "localEndpoint": "http://localhost:5173",
-  "serverPort": 51064
+  "loginUser": "girishingale912020@gmail.com",
+  "loginPassword": "6g3qwMe",
+  "executionArgs": {
+    "projectName": "invoice-generator",
+    "projectPath": "C:\\Users\\giris\\Downloads\\invoice generator\\invoice-generator",
+    "testIds": [],
+    "additionalInstruction": "",
+    "envs": {
+      "API_KEY": "sk-user-2dUtCA9kq9BvYSNUNBAzTbSki6FONwqgS-hTzSVtuxmmRyfUiV1CmNTH1yD67GMoP4GBpwyrGd3YsTfbFXXKFze7nxW-mCu-4bmtXYaugsfw_tDmHaQLH9k51ZS1SE9E59E"
+    }
+  },
+  "proxy": "http://a8b98b89-db40-497c-ad8a-c608c3573726:6L8eSsSvncSwMF9P01i5rHk8krD1gBqo@tun.testsprite.com:8080"
 }

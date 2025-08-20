@@ -1,6 +1,7 @@
 import { TokenManager, TokenRefreshService } from './tokenManager';
 import { store } from '../store';
 import { logout } from '../store/authSlice';
+import { ErrorHandler } from './errorHandler';
 
 // Base API URL - use environment variable or fallback to localhost for development
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -50,11 +51,24 @@ export class ApiClient {
       (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
     }
 
-    // Make the request
-    const response = await fetch(`${API_BASE_URL}${url}`, {
-      ...options,
-      headers,
-    });
+    // Make the request with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    
+    let response: Response;
+    try {
+      response = await fetch(`${API_BASE_URL}${url}`, {
+        ...options,
+        headers,
+        signal: controller.signal,
+      });
+    } catch (fetchError: any) {
+      clearTimeout(timeoutId);
+      ErrorHandler.logError(fetchError, `API Request: ${url}`);
+      throw fetchError;
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     // Handle response
     if (!response.ok) {
@@ -65,18 +79,22 @@ export class ApiClient {
         errorData = { message: 'An error occurred' };
       }
 
-      // Handle 401 errors (unauthorized)
-      if (response.status === 401) {
-        TokenManager.clearTokens();
-        store.dispatch(logout());
-        throw new ApiError('Authentication required. Please login again.', 401, errorData);
-      }
-
-      throw new ApiError(
+      const apiError = new ApiError(
         errorData.message || `HTTP error! status: ${response.status}`,
         response.status,
         errorData
       );
+
+      // Log the error for debugging
+      ErrorHandler.logError(apiError, `API Response: ${url}`);
+
+      // Handle 401 errors (unauthorized)
+      if (response.status === 401) {
+        TokenManager.clearTokens();
+        store.dispatch(logout());
+      }
+
+      throw apiError;
     }
 
     // Handle different content types

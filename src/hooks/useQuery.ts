@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDispatch } from 'react-redux';
 import { loginSuccess, loginFailure, registerSuccess, registerFailure } from '../store/authSlice';
-import { fetchProductsSuccess } from '../store/productsSlice';
+import { fetchProductsSuccess, addProductSuccess, deleteProductSuccess } from '../store/productsSlice';
 import ApiClient from '../utils/apiClient';
+import { ErrorHandler } from '../utils/errorHandler';
 
 // Auth hooks
 export const useLogin = () => {
@@ -10,7 +11,12 @@ export const useLogin = () => {
   
   return useMutation({
     mutationFn: async ({ email, password }: { email: string; password: string }) => {
-      return ApiClient.post('/auth/login', { email, password });
+      try {
+        return await ApiClient.post('/auth/login', { email, password });
+      } catch (error) {
+        ErrorHandler.logError(error, 'Login');
+        throw error;
+      }
     },
     onSuccess: (data) => {
       dispatch(loginSuccess({
@@ -30,7 +36,12 @@ export const useRegister = () => {
   
   return useMutation({
     mutationFn: async ({ name, email, password }: { name: string; email: string; password: string }) => {
-      return ApiClient.post('/auth/register', { name, email, password });
+      try {
+        return await ApiClient.post('/auth/register', { name, email, password });
+      } catch (error) {
+        ErrorHandler.logError(error, 'Register');
+        throw error;
+      }
     },
     onSuccess: (data) => {
       dispatch(registerSuccess({
@@ -52,37 +63,71 @@ export const useProducts = () => {
   return useQuery({
     queryKey: ['products'],
     queryFn: async () => {
-      const data = await ApiClient.get('/products');
-      // Extract products array from response object
-      const products = data.products || [];
-      dispatch(fetchProductsSuccess(products));
-      return data;
+      try {
+        const data = await ApiClient.get('/products');
+        // Extract products array from response object
+        const products = data.products || [];
+        dispatch(fetchProductsSuccess(products));
+        return data;
+      } catch (error) {
+        ErrorHandler.logError(error, 'Fetch Products');
+        throw error;
+      }
     },
+    retry: (failureCount, error) => {
+      // Retry up to 3 times for retryable errors
+      return failureCount < 3 && ErrorHandler.isRetryableError(error);
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 };
 
 export const useCreateProduct = () => {
   const queryClient = useQueryClient();
+  const dispatch = useDispatch();
   
   return useMutation({
     mutationFn: async (product: any) => {
-      return ApiClient.post('/products', product);
+      try {
+        return await ApiClient.post('/products', product);
+      } catch (error) {
+        ErrorHandler.logError(error, 'Create Product');
+        throw error;
+      }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Update Redux state immediately
+      dispatch(addProductSuccess(data.product));
+      // Invalidate React Query cache
       queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+    retry: (failureCount, error) => {
+      return failureCount < 2 && ErrorHandler.isRetryableError(error);
     },
   });
 };
 
 export const useDeleteProduct = () => {
   const queryClient = useQueryClient();
+  const dispatch = useDispatch();
   
   return useMutation({
     mutationFn: async (productId: string) => {
-      return ApiClient.delete(`/products/${productId}`);
+      try {
+        return await ApiClient.delete(`/products/${productId}`);
+      } catch (error) {
+        ErrorHandler.logError(error, 'Delete Product');
+        throw error;
+      }
     },
-    onSuccess: () => {
+    onSuccess: (_, productId) => {
+      // Update Redux state immediately
+      dispatch(deleteProductSuccess(productId));
+      // Invalidate React Query cache
       queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+    retry: (failureCount, error) => {
+      return failureCount < 2 && ErrorHandler.isRetryableError(error);
     },
   });
 };
@@ -91,21 +136,15 @@ export const useDeleteProduct = () => {
 export const useGeneratePDF = () => {
   return useMutation({
     mutationFn: async (data: any) => {
-      // Make a direct POST request for PDF generation
-      const response = await fetch('http://localhost:5000/api/pdf/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify(data),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to generate PDF');
+      try {
+        return await ApiClient.post('/pdf/generate', data);
+      } catch (error) {
+        ErrorHandler.logError(error, 'Generate PDF');
+        throw error;
       }
-      
-      return response.blob();
+    },
+    retry: (failureCount, error) => {
+      return failureCount < 2 && ErrorHandler.isRetryableError(error);
     },
   });
 };

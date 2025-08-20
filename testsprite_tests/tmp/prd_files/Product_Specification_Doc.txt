@@ -1,0 +1,48 @@
+# Product Specification Document: MERN Stack PDF Generator
+
+## Purpose
+This project is for an assignment to show I can build a full-stack web app using the MERN stack. The goal is to create an Invoice Generator where users can log in, add products, and download a PDF invoice. It’s based on a Figma design I got, and I want it to look exactly like that. I started this on Aug 20, 2025, and it’s my chance to impress recruiters!
+
+## Features
+### 1. Login Page
+- **What It Does**: Users enter email and password to log in.
+- **How It Works**: Checks email with a regex (something like @ and .), shows success or error messages. If it works, goes to Add Products page.
+- **Design**: Centered form, blue login button (#1E3A8A), matches Figma.
+- **Note**: “// Took me a bit to get the validation right!”
+
+### 2. Registration Page
+- **What It Does**: Users sign up with name, email, and password.
+- **How It Works**: Validates email with regex, saves to database, then sends to Login page.
+- **Design**: Simple form, matches Figma layout.
+- **Note**: “// Struggled with redirect but fixed it!”
+
+### 3. Add Product Page
+- **What It Does**: Users add products with Name, Quantity, and Rate.
+- **How It Works**: Calculates Total (Qty * Rate) and GST (18%), lets users add multiple products, has a “Next” button to PDF page.
+- **Design**: Green “+ Add” button (#10B981), blue “Next” button, Figma exact.
+- **Note**: “// Had to double-check the math here!”
+
+### 4. Generate PDF Page
+- **What It Does**: Generates and downloads a PDF invoice.
+- **How It Works**: Sends product data to backend, saves to database with date, uses Puppeteer to create PDF from Figma sample, offers download.
+- **Design**: Shows product list, blue download button, matches Figma PDF.
+- **Note**: “// PDF took some time to match the design!”
+
+## How It Should Work
+- **Flow**: Start at Login, register if new, add products, generate PDF.
+- **Tech**: React frontend, Node.js backend, MongoDB, Redux for state, TanStack Query for API, Tailwind/Shadcn for styling, Puppeteer for PDF.
+- **Security**: JWT for login, basic validation on forms.
+- **Scalability**: Simple now, but I can add more features later like more fields.
+- **Note**: “// Kept it basic to avoid bugs, might add tests later!”
+
+## Testing Plan
+- Test login with wrong email, check error message.
+- Add 3 products, verify Total and GST.
+- Generate PDF, ensure it looks like Figma.
+- Check on mobile and desktop.
+- **Note**: “// Planning to test step by step as I build!”
+
+## Additional Notes
+- Must match Figma (https://www.figma.com/design/rL5i4YDDb25dhyG2426hEM/Levitation---Assignment-Invoice-Task?node-id=447-151&t=m4WjTYPzyc8EUeh-0) pixel-perfect.
+- Deploy on Vercel (frontend) and Cyclic (backend), share GitHub link.
+- **Note**: “// Excited to see how Trae handles this doc!”

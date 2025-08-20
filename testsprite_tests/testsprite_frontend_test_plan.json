@@ -1,0 +1,389 @@
+[
+  {
+    "id": "TC001",
+    "title": "User Registration Successful",
+    "description": "Verify a new user can successfully register with valid email, password, and required details using the registration form with Zod validation.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to Registration page"
+      },
+      {
+        "type": "action",
+        "description": "Input a valid email, strong password, and matching confirm password"
+      },
+      {
+        "type": "action",
+        "description": "Submit registration form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify successful registration confirmation message is shown and user is redirected to Login page"
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "User Registration Validation Errors",
+    "description": "Verify registration form shows validation messages for invalid inputs such as malformed email, weak password, or missing fields using Zod schema.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to Registration page"
+      },
+      {
+        "type": "action",
+        "description": "Input invalid email format and weak password"
+      },
+      {
+        "type": "action",
+        "description": "Submit registration form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify appropriate error messages displayed for email and password fields"
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "User Login Success with Correct Credentials",
+    "description": "Verify a registered user can login successfully with correct email and password, receiving a valid JWT token and access to protected routes.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to Login page"
+      },
+      {
+        "type": "action",
+        "description": "Input valid registered email and password"
+      },
+      {
+        "type": "action",
+        "description": "Submit login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify successful login, JWT token returned, and user redirected to protected dashboard"
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "User Login Failure with Invalid Credentials",
+    "description": "Verify login fails with incorrect email or password, displaying appropriate authentication error without issuing JWT token.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to Login page"
+      },
+      {
+        "type": "action",
+        "description": "Input invalid email or incorrect password"
+      },
+      {
+        "type": "action",
+        "description": "Submit login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify authentication error displayed and no JWT token is issued"
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Protected Route Access Control",
+    "description": "Verify protected pages cannot be accessed without valid JWT token, and unauthorized users are redirected to login page.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Attempt to navigate directly to Add Product or Generate PDF pages without login"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify user is redirected to Login page"
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Add Single Product with Valid Inputs",
+    "description": "Verify user can add a product with valid name, quantity, and rate; total and GST calculations update instantly and product is stored in Redux state.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to Add Products page after login"
+      },
+      {
+        "type": "action",
+        "description": "Input valid product name, quantity (positive integer), and rate (positive number)"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify total and GST fields update automatically and correctly"
+      },
+      {
+        "type": "action",
+        "description": "Submit the product addition"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify product is added to Redux store and visible in product list"
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Add Multiple Products and Verify Aggregations",
+    "description": "Verify user can add multiple different products, and the product list shows correct cumulative totals and GST calculations for all entries.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Add first valid product with specified quantity and rate"
+      },
+      {
+        "type": "action",
+        "description": "Add second valid product with different quantity and rate"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify product list shows both products and total invoice totals and GST sums are accurate"
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Product Input Validation",
+    "description": "Verify that product form validates inputs and shows errors on empty name, zero or negative quantity or rate, preventing product addition.",
+    "category": "error handling",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to Add Products page"
+      },
+      {
+        "type": "action",
+        "description": "Input empty name, zero quantity, or negative rate"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to add product"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify validation error messages are shown and product is not added"
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Invoice PDF Generation Success",
+    "description": "Verify users can generate a PDF invoice from added products that matches the Figma design in style and content, includes correct calculations, and triggers download.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Add multiple valid products"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to Generate PDF page"
+      },
+      {
+        "type": "action",
+        "description": "Trigger PDF generation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify backend saves invoice record, Puppeteer generates styled PDF with correct product data, totals, GST, and branding"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify PDF download is initiated successfully"
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Generate PDF with No Products Error",
+    "description": "Verify generating PDF without any products added shows an appropriate error and prevents PDF generation.",
+    "category": "error handling",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to Generate PDF page with empty product list"
+      },
+      {
+        "type": "action",
+        "description": "Trigger PDF generation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify error message displayed indicating no products to invoice and PDF generation is blocked"
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "JWT Token Expiration Enforcement",
+    "description": "Verify that after JWT token expiration, the user is logged out and redirected to login page when accessing protected routes.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login and obtain JWT token"
+      },
+      {
+        "type": "action",
+        "description": "Simulate or wait until JWT token expires"
+      },
+      {
+        "type": "action",
+        "description": "Attempt access to protected route"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify user is logged out and redirected to login page"
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Responsive UI on Mobile and Desktop",
+    "description": "Verify all pages (Login, Register, Add Products, Generate PDF) render correctly and maintain pixel-perfect design on various screen sizes including mobile and desktop.",
+    "category": "ui",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open application on desktop viewport"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify UI matches pixel-perfect Figma design"
+      },
+      {
+        "type": "action",
+        "description": "Resize browser to mobile viewport or test on mobile device"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify UI is responsive, accessible, and layout adapts correctly with no broken or overlapping elements"
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "API Error Handling on Backend Failures",
+    "description": "Verify that when backend APIs for login, product saving, or PDF generation fail due to server errors, user is shown meaningful error messages and UI handles errors gracefully.",
+    "category": "error handling",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Simulate server error on login API"
+      },
+      {
+        "type": "action",
+        "description": "Attempt user login"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify error notification or toast displays appropriate message"
+      },
+      {
+        "type": "action",
+        "description": "Simulate failure on product add API or PDF generation API"
+      },
+      {
+        "type": "action",
+        "description": "Perform respective actions (add product, generate PDF)"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify graceful error handling and user feedback"
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "State Management Redux Store Updates",
+    "description": "Verify Redux store updates correctly for authentication states (login/logout) and product list additions or removals with immediate reflected UI changes.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login user and check Redux state for auth token and user info"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify auth slice stores JWT token and user data correctly"
+      },
+      {
+        "type": "action",
+        "description": "Add products and check product slice state updates"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify product list in store matches UI and has correct product details"
+      },
+      {
+        "type": "action",
+        "description": "Logout user"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Redux store resets authentication state"
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "React Hook Form and Zod Schema Integration for Product Input",
+    "description": "Verify form validation is implemented using React Hook Form integrated with Zod schema to enforce required fields and valid numeric inputs on Add Products form.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to Add Products page"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to submit form with empty or invalid fields"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify real-time validation messages appear before submit"
+      },
+      {
+        "type": "action",
+        "description": "Fill all fields with valid data"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify submission succeeds without errors"
+      }
+    ]
+  }
+]

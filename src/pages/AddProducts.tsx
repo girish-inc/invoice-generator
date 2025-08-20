@@ -6,7 +6,6 @@ import * as z from 'zod';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-// import { Label } from '@/components/ui/label'; // Removed unused import
 import {
   Form,
   FormControl,
@@ -16,10 +15,10 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Trash2, Plus, Calculator } from 'lucide-react';
-import { useAppDispatch, useAppSelector, store } from '../store';
-// import { Label } from '@/components/ui/label'; // Removed unused import
+import { useAppDispatch, useAppSelector } from '../store';
 import { useCreateProduct } from '../hooks/useQuery';
 import { addProductSuccess, clearProducts } from '../store/productsSlice';
+import { useToast } from '../components/Toast';
 
 const productSchema = z.object({
   name: z.string().min(1, 'Product name is required').trim(),
@@ -37,6 +36,7 @@ const productsFormSchema = z.object({
 const AddProducts: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { success, error } = useToast();
   
   // TanStack Query hooks
   // Removed useProducts() to prevent automatic fetching that overwrites Redux state
@@ -66,13 +66,9 @@ const AddProducts: React.FC = () => {
     return products.reduce((sum, product) => sum + calculateTotal(product.qty, product.rate), 0);
   };
 
-  const calculateGST = (): number => {
-    return calculateSubtotal() * 0.18;
-  };
+  
 
-  const calculateGrandTotal = (): number => {
-    return calculateSubtotal() + calculateGST();
-  };
+
 
   // Removed useEffect that referenced apiProducts to prevent automatic fetching
 
@@ -91,55 +87,21 @@ const AddProducts: React.FC = () => {
   const onSubmit = async (values: z.infer<typeof productsFormSchema>) => {
     try {
       if (!user?.id) {
-        alert('User not authenticated. Please log in again.');
+        error('Authentication Error', 'User not authenticated. Please log in again.');
         return;
       }
 
       // Clear existing products before adding new ones
       dispatch(clearProducts());
-      console.log('Cleared existing products from Redux state');
-
-      // Debug: Check current state before adding products
-      const currentState = store.getState();
-      console.log('Current products state before adding:', currentState.products);
-      console.log('Is products an array?', Array.isArray(currentState.products.products));
 
       // Save products to API and update Redux store
       const savedProducts = [];
       for (const product of values.products) {
-        console.log('Submitting product:', {
-          name: product.name,
-          qty: product.qty,
-          rate: product.rate,
-          userId: user.id,
-          types: {
-            name: typeof product.name,
-            qty: typeof product.qty,
-            rate: typeof product.rate
-          }
-        });
-        
         const savedProduct = await createProductMutation.mutateAsync({
           name: product.name,
           description: product.description || '',
-          qty: Number(product.qty), // Ensure it's a number
-          rate: Number(product.rate) // Ensure it's a number
-        });
-        
-        // Debug: Check state before dispatch
-        const stateBeforeDispatch = store.getState();
-        console.log('State before dispatch:', stateBeforeDispatch.products);
-        console.log('Is products array before dispatch?', Array.isArray(stateBeforeDispatch.products.products));
-        
-        // Debug: Log the saved product response
-        console.log('Backend response for saved product:', savedProduct);
-        console.log('Product data from backend:', {
-          id: savedProduct.product.id,
-          name: savedProduct.product.name,
-          qty: savedProduct.product.qty,
-          rate: savedProduct.product.rate,
-          qtyType: typeof savedProduct.product.qty,
-          rateType: typeof savedProduct.product.rate
+          qty: Number(product.qty),
+          rate: Number(product.rate)
         });
         
         // Dispatch to Redux store
@@ -154,27 +116,25 @@ const AddProducts: React.FC = () => {
           updatedAt: new Date().toISOString()
         };
         
-        console.log('Dispatching product payload:', productPayload);
         dispatch(addProductSuccess(productPayload));
-        
-        // Debug: Check state after dispatch
-        const stateAfterDispatch = store.getState();
-        console.log('State after dispatch:', stateAfterDispatch.products);
-        console.log('Is products array after dispatch?', Array.isArray(stateAfterDispatch.products.products));
-        
         savedProducts.push(savedProduct);
       }
       
-      console.log('Products saved to API:', savedProducts);
-      console.log('Subtotal:', calculateSubtotal());
-      console.log('GST (18%):', calculateGST());
-      console.log('Grand Total:', calculateGrandTotal());
+      // Show success toast and navigate
+      success(
+        'Products Saved Successfully', 
+        `${savedProducts.length} product(s) saved. Redirecting to PDF generation...`
+      );
       
-      navigate('/generate-pdf');
+      // Navigate after a brief delay to show success message
+      setTimeout(() => {
+        navigate('/generate-pdf');
+      }, 1500);
       
-    } catch (error: any) {
-      console.error('Error saving products:', error);
-      alert('Failed to save products. Please try again.');
+    } catch (err: any) {
+      console.error('Error saving products:', err);
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to save products. Please try again.';
+      error('Save Failed', errorMessage);
     }
   };
 
@@ -340,10 +300,20 @@ const AddProducts: React.FC = () => {
             <div className="mt-6">
               <Button
                 type="submit"
-                disabled={form.formState.isSubmitting}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={form.formState.isSubmitting || createProductMutation.isPending}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
-                {form.formState.isSubmitting ? 'Saving...' : 'Save Products & Continue'}
+                {form.formState.isSubmitting || createProductMutation.isPending ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Saving Products...
+                  </>
+                ) : (
+                  'Save Products & Continue'
+                )}
               </Button>
             </div>
           </form>
