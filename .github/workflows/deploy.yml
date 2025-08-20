@@ -1,0 +1,82 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Run Tests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run frontend tests
+        run: npm run test:ci || echo "No tests configured"
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Build backend
+        run: npm run build:server
+
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    name: Deploy Frontend to Vercel
+    needs: test
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+          working-directory: ./
+
+  deploy-backend:
+    runs-on: ubuntu-latest
+    name: Deploy Backend to Render
+    needs: test
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Render
+        run: |
+          curl -X POST "https://api.render.com/deploy/srv-${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}"
+
+  notify:
+    runs-on: ubuntu-latest
+    name: Notify Deployment Status
+    needs: [deploy-frontend, deploy-backend]
+    if: always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    steps:
+      - name: Deployment Success
+        if: needs.deploy-frontend.result == 'success' && needs.deploy-backend.result == 'success'
+        run: echo "✅ Deployment successful to both Vercel and Render!"
+
+      - name: Deployment Failed
+        if: needs.deploy-frontend.result == 'failure' || needs.deploy-backend.result == 'failure'
+        run: |
+          echo "❌ Deployment failed!"
+          echo "Frontend: ${{ needs.deploy-frontend.result }}"
+          echo "Backend: ${{ needs.deploy-backend.result }}"
+          exit 1

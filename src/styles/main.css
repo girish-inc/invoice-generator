@@ -1,0 +1,158 @@
+/* Main styles for Invoice Generator - Figma Design Match */
+
+/* Custom color variables for Figma design */
+:root {
+  --figma-blue: #1E3A8A;
+  --figma-green: #10B981;
+  --figma-white: #ffffff;
+}
+
+/* Base layout and background */
+body {
+  background-color: var(--figma-white);
+  color: #1f2937;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Button styling - 120px width as specified */
+.btn-primary {
+  @apply bg-blue-800 hover:bg-blue-900 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200;
+  background-color: var(--figma-blue);
+  width: 120px;
+  min-width: 120px;
+}
+
+.btn-secondary {
+  @apply bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200;
+  background-color: var(--figma-green);
+  width: 120px;
+  min-width: 120px;
+}
+
+/* Form container responsive design */
+.form-container {
+  @apply w-full max-w-4xl mx-auto p-6;
+}
+
+/* Mobile-first responsive design */
+@media (max-width: 640px) {
+  .form-container {
+    @apply max-w-sm px-4;
+  }
+  
+  .mobile-stack {
+    @apply flex flex-col space-y-4;
+  }
+  
+  .btn-primary,
+  .btn-secondary {
+    @apply w-full;
+    min-width: unset;
+  }
+}
+
+/* Medium screens and up */
+@media (min-width: 768px) {
+  .md-flex {
+    @apply flex items-center space-x-4;
+  }
+  
+  .form-container {
+    @apply px-8;
+  }
+}
+
+/* Card styling for forms */
+.form-card {
+  @apply bg-white rounded-lg shadow-lg border border-gray-200 p-6;
+}
+
+/* Input styling to match Shadcn */
+.form-input {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+}
+
+/* Label styling */
+.form-label {
+  @apply block text-sm font-medium text-gray-700 mb-2;
+}
+
+/* Product row styling */
+.product-row {
+  @apply grid grid-cols-1 gap-4;
+}
+
+@media (min-width: 768px) {
+  .product-row {
+    @apply grid-cols-4 items-end;
+  }
+}
+
+/* Navigation styling */
+.nav-container {
+  @apply flex flex-col space-y-4;
+}
+
+@media (min-width: 768px) {
+  .nav-container {
+    @apply flex-row justify-between items-center space-y-0;
+  }
+}
+
+/* Summary section styling */
+.summary-section {
+  @apply bg-gray-50 rounded-lg p-6 mt-6;
+}
+
+/* Responsive text sizing */
+.heading-primary {
+  @apply text-2xl font-bold text-gray-900;
+}
+
+@media (min-width: 768px) {
+  .heading-primary {
+    @apply text-3xl;
+  }
+}
+
+/* Utility classes for spacing */
+.section-spacing {
+  @apply py-8;
+}
+
+.content-spacing {
+  @apply space-y-6;
+}
+
+/* Focus states for accessibility */
+.btn-primary:focus,
+.btn-secondary:focus {
+  @apply outline-none ring-2 ring-offset-2;
+}
+
+.btn-primary:focus {
+  @apply ring-blue-500;
+}
+
+.btn-secondary:focus {
+  @apply ring-emerald-500;
+}
+
+/* Loading states */
+.btn-loading {
+  @apply opacity-75 cursor-not-allowed;
+}
+
+/* Error states */
+.form-error {
+  @apply border-red-500 focus:ring-red-500;
+}
+
+.error-text {
+  @apply text-red-600 text-sm mt-1;
+}
+
+/* Success states */
+.success-text {
+  @apply text-emerald-600 text-sm mt-1;
+}

@@ -1,0 +1,1 @@
+{"root":["./server/server.ts","./server/config/db.ts","./server/middleware/auth.ts","./server/models/invoicemodel.ts","./server/models/productmodel.ts","./server/models/usermodel.ts","./server/routes/auth.ts","./server/routes/pdf.ts","./server/routes/products.ts"],"version":"5.8.3"}
