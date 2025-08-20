@@ -3,7 +3,7 @@ services:
     name: invoice-generator-backend
     env: node
     plan: free
-    buildCommand: npm install && npm run build:server
+    buildCommand: npm ci && npm run build:server
     startCommand: node dist/server.js
     envVars:
       - key: NODE_ENV
