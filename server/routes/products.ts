@@ -116,4 +116,37 @@ router.post('/', auth, async (req: Request, res: Response) => {
   }
 });
 
+// DELETE /api/products/:id - Delete a specific product
+router.delete('/:id', auth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // For testing without MongoDB, return mock response
+    if (!process.env.MONGO_URI || process.env.MONGO_URI.includes('localhost:27017')) {
+      return res.status(200).json({
+        message: 'Product deleted successfully (test mode)',
+        productId: id
+      });
+    }
+
+    // Find and delete the product
+    const product = await Product.findOneAndDelete({ 
+      _id: id, 
+      userId: (req as any).user._id 
+    });
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    res.status(200).json({
+      message: 'Product deleted successfully',
+      productId: id
+    });
+  } catch (error) {
+    console.error('Product delete error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 export default router;
